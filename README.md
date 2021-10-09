@@ -1,3 +1,3 @@
-# chacra . crowdfarming
+# chacra.crowdfarming
 
 ------------------------
