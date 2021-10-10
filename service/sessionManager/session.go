@@ -1,0 +1,4 @@
+/*
+	Package sessionManager ...
+*/
+package sessionManager
