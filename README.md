@@ -1,3 +1,1 @@
-# chacra . crowdfarming
-
-------------------------
+# chacra - crowdfarming
