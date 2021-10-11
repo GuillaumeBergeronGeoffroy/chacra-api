@@ -4,7 +4,8 @@ import "database/sql"
 
 // TransactionManager exportable
 type TransactionManager struct {
-	DB *sql.DB
+	DB    *sql.DB
+	links map[string]string
 }
 
 // ProducerPortalActions exportable

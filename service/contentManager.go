@@ -6,7 +6,8 @@ import (
 
 // ContentManager exportable
 type ContentManager struct {
-	DB *sql.DB
+	DB    *sql.DB
+	links map[string]string
 }
 
 // ContentManagerActions exportable

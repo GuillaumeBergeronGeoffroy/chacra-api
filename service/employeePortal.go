@@ -4,7 +4,8 @@ import "database/sql"
 
 // EmployeePortal exportable
 type EmployeePortal struct {
-	DB *sql.DB
+	DB    *sql.DB
+	links map[string]string
 }
 
 // EmployeePortalActions exportable

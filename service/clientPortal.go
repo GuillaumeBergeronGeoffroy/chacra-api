@@ -7,6 +7,7 @@ import (
 // ClientPortal exportable
 type ClientPortal struct {
 	DB *sql.DB
+	links map[string]string
 }
 
 // ClientPortalActionS exportable

@@ -4,7 +4,8 @@ import "database/sql"
 
 // LogManager exportable
 type LogManager struct {
-	DB *sql.DB
+	DB    *sql.DB
+	links map[string]string
 }
 
 // LogManagerActions exportable

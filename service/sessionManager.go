@@ -5,6 +5,7 @@ import "github.com/go-redis/redis/v8"
 // ProducerPortal exportable
 type SessionManager struct {
 	redisClient *redis.Client
+	links       map[string]string
 }
 
 // SessionManager exportable

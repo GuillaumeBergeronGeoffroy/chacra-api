@@ -4,7 +4,8 @@ import "database/sql"
 
 // ProducerPortal exportable
 type ProducerPortal struct {
-	DB *sql.DB
+	DB    *sql.DB
+	links map[string]string
 }
 
 // ProducerPortalActions exportable
