@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	s "github.com/GuillaumeBergeronGeoffroy/chacra/service"
+	s "github.com/GuillaumeBergeronGeoffroy/chacra-api/service"
 
 	"github.com/spf13/viper"
 )

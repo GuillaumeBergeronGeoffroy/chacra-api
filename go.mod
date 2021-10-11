@@ -1,4 +1,4 @@
-module github.com/GuillaumeBergeronGeoffroy/chacra
+module github.com/GuillaumeBergeronGeoffroy/chacra-api
 
 go 1.17
 

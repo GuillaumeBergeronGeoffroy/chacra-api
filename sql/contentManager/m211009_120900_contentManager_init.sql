@@ -11,13 +11,13 @@ CREATE TABLE Content (
 );
 
 -- TO CONST 
--- content_status 0 awaiting_submission, 1 awaiting_revision, 2 accepted 
--- content_model_type_id -> in each model
+-- contentStatus 0 awaitingSubmission, 1 awaitingRevision, 2 accepted 
+-- contentModelTypeId -> defined in each model
 
 CREATE TABLE ContentSuggestion (
     contentSuggestionId INT NOT NULL AUTO_INCREMENT,
     contentId VARCHAR(255) NOT NULL,
-    contentSuggestionBalue TEXT NOT NULL,
+    contentSuggestionValue TEXT NOT NULL,
     PRIMARY KEY (contentSuggestionId),
     CONSTRAINT fkey_ContentSuggestion_contentId FOREIGN KEY (contentId)
     REFERENCES Content (contentId)

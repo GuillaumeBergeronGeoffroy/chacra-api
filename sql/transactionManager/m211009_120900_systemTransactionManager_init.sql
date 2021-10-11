@@ -17,7 +17,6 @@ CREATE TABLE Order (
     orderId INT NOT NULL AUTO_INCREMENT,
     productId INT NOT NULL, 
     orderStatus TINYINT DEFAULT 0, 
-    orderCreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (orderId)
 );
 
@@ -29,7 +28,6 @@ CREATE TABLE OrderFullfilment (
     orderFullfilmentOptionTypeId TINYINT DEFAULT 0,
     orderId INT NOT NULL,
     orderFullfilmentStatus TINYINT DEFAULT 0, 
-    orderFullfilmentCreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (order_fullfilmentId),
     CONSTRAINT fkey_OrderFullfilment_orderId FOREIGN KEY (orderId)
     REFERENCES Order (orderId)
