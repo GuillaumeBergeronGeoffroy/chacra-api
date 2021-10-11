@@ -1,4 +1,0 @@
-/*
-	Package contentManager ...
-*/
-package contentManager

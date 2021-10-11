@@ -1,4 +1,0 @@
-/*
-	Package employeePortal ...
-*/
-package employeePortal

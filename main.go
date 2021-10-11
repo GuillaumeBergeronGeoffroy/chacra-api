@@ -1,36 +1,34 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+
+	s "./service"
+	"github.com/spf13/viper"
 )
 
-type Action func(w http.ResponseWriter, r *http.Request)
-type Actions map[string]Action
-type Services []interface{}
-
-// use viper package to read .env file
-// return the value of the key
-func viperEnvVariable(key string) (value string, err string) {
-	// viper.SetConfigFile(".env")
-	// err = viper.ReadInConfig()
-	// if err != null {
-	// 	return
-	// }
-	// value, ok := viper.Get(key).(string)
-	// if !ok {
-	// 	err = "Invalid type assert"
-	// } else if !value {
-	// 	err = "Invalid value"
-	// }
-	// return
+type Config struct {
+	ServicesConfig []s.ServiceConfig
 }
 
 func main() {
-	// services := Services{}
-	// for _, val := range services {
-	// 	value, error := viperEnvVariable(val.key)
-	// }
-	// // for service / params in .env
-	// // execute service settup
-	// http.ListenAndServe(":3000", nil)
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.WatchConfig()
+	viper.AutomaticEnv()
+	viper.SetConfigType("yml")
+	config := Config{}
+	viper.Unmarshal(&config)
+	for _, serviceConfig := range config.ServicesConfig {
+		serviceActions, err := s.InitService(serviceConfig)
+		if err != nil {
+			fmt.Println("Error while initializing service: ", err)
+			continue
+		}
+		for route, action := range serviceActions {
+			http.HandleFunc(route, action)
+		}
+	}
+	http.ListenAndServe(":3000", nil)
 }

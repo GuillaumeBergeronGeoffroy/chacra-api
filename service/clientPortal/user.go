@@ -1,4 +1,0 @@
-/*
-	Package clientPortal ...
-*/
-package clientPortal

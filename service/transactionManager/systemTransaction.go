@@ -1,4 +1,0 @@
-/*
-	Package transactionManager ...
-*/
-package transactionManager
