@@ -2,7 +2,7 @@ package models
 
 // Order model exportable
 type Order struct {
-	orderId     uint32
-	productId   uint32
-	orderStatus uint8
+	OrderId     uint32
+	OroductId   uint32
+	OrderStatus uint8
 }

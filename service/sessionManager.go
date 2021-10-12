@@ -2,24 +2,21 @@ package service
 
 import (
 	"sync"
-
-	"github.com/go-redis/redis/v8"
 )
 
 type sessionManager struct {
-	redisClient *redis.Client
-	gateway     map[string]string
+	Dao *Dao
 }
 
 var smOnce sync.Once
 var sm sessionManager
 
 // SessionManager exportable singleton
-func SessionManager(redisClient *redis.Client, gateway map[string]string) sessionManager {
+func SessionManager(dao *Dao) *sessionManager {
 	smOnce.Do(func() {
-		sm = sessionManager{redisClient, gateway}
+		sm = sessionManager{dao}
 	})
-	return sm
+	return &sm
 }
 
 // SessionManagerActions exportable

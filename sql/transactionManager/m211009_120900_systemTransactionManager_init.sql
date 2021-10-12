@@ -1,36 +1,36 @@
 CREATE TABLE SystemTransaction (
-    systemTransactionId INT NOT NULL AUTO_INCREMENT,
-    systemTransactionTypeId TINYINT NOT NULL, 
-    userId INT,
-    producerId INT,
-    employeeId INT,
-    systemTransactionCreatedAt DATETIME DEFAULT CURRENTTIMESTAMP,
-    PRIMARY KEY (transactionId)
+    SystemTransactionId INT NOT NULL AUTO_INCREMENT,
+    SystemTransactionTypeId TINYINT NOT NULL, 
+    UserId INT,
+    ProducerId INT,
+    EmployeeId INT,
+    SystemTransactionCreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (SystemTransactionId)
 );
 
-CREATE INDEX SystemTransaction_userId ON transaction (userId);
-CREATE INDEX SystemTransaction_producerId ON transaction (producerId);
-CREATE INDEX SystemTransaction_employeeId ON transaction (employeeId);
-CREATE INDEX SystemTransaction_transactionCreatedAt ON transaction (transactionCreatedAt);
+CREATE INDEX SystemTransaction_UserId ON transaction (UserId);
+CREATE INDEX SystemTransaction_ProducerId ON transaction (UserId);
+CREATE INDEX SystemTransaction_EmployeeId ON transaction (EmployeeId);
+CREATE INDEX SystemTransaction_TransactionCreatedAt ON transaction (TransactionCreatedAt);
 
-CREATE TABLE Order (
-    orderId INT NOT NULL AUTO_INCREMENT,
-    productId INT NOT NULL, 
-    orderStatus TINYINT DEFAULT 0, 
-    PRIMARY KEY (orderId)
+CREATE TABLE `Order` (
+    OrderId INT NOT NULL AUTO_INCREMENT,
+    ProductId INT NOT NULL, 
+    OrderStatus TINYINT DEFAULT 0, 
+    PRIMARY KEY (OrderId)
 );
 
-CREATE INDEX Order_productId ON Order (productId);
+CREATE INDEX Order_ProductId ON `Order` (ProductId);
 -- CREATE INDEX order_orderCreatedAt ON order (orderCreatedAt);
 
 CREATE TABLE OrderFullfilment (
-    orderFullfilmentId INT NOT NULL AUTO_INCREMENT,
-    orderFullfilmentOptionTypeId TINYINT DEFAULT 0,
-    orderId INT NOT NULL,
-    orderFullfilmentStatus TINYINT DEFAULT 0, 
-    PRIMARY KEY (order_fullfilmentId),
-    CONSTRAINT fkey_OrderFullfilment_orderId FOREIGN KEY (orderId)
-    REFERENCES Order (orderId)
+    OrderFullfilmentId INT NOT NULL AUTO_INCREMENT,
+    OrderFullfilmentOptionTypeId TINYINT DEFAULT 0,
+    OrderId INT NOT NULL,
+    OrderFullfilmentStatus TINYINT DEFAULT 0, 
+    PRIMARY KEY (OrderFullfilmentId),
+    CONSTRAINT fkey_OrderFullfilment_OrderId FOREIGN KEY (OrderId)
+    REFERENCES `Order` (OrderId)
 );
 
 -- TO CONST

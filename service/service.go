@@ -9,16 +9,18 @@ import (
 	"net/http"
 
 	"github.com/go-redis/redis/v8"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // ServiceConfig exportable
 type ServiceConfig struct {
-	name       string
-	host       string
-	user       string
-	password   string
-	mysqldb    bool
-	redisStore bool
+	Name       string
+	Host       string
+	Port       string
+	User       string
+	Password   string
+	Mysqldb    bool
+	RedisStore bool
 }
 
 // Action exportable
@@ -27,50 +29,59 @@ type Action func(w http.ResponseWriter, r *http.Request)
 // Actions exportable
 type Actions map[string]Action
 
-type dao struct {
-	db          *sql.DB
-	ctx         context.Context
-	redisClient *redis.Client
+// Dao exportable
+type Dao struct {
+	DB          *sql.DB
+	Ctx         context.Context
+	RedisClient *redis.Client
+	Gateway     map[string]string
 }
 
-var daoIns = dao{}
-
 // InitService exportable
-func InitService(sC ServiceConfig, gateway map[string]string) (ac Actions, err error) {
+func InitService(sc ServiceConfig, gateway map[string]string) (ac Actions, err error) {
+	var daoIns = Dao{}
+	// Set Gateway
+	daoIns.Gateway = gateway
 	// Mysql connection pool init
-	if sC.mysqldb && daoIns.db == nil {
-		daoIns.db, err = sql.Open("mysql", sC.user+"@"+sC.password)
+	if sc.Mysqldb {
+		daoIns.DB, err = sql.Open("mysql", sc.User+":"+sc.Password+"@tcp("+sc.Host+":"+sc.Port+")/chacra")
 		if err != nil {
 			return
 		}
-	}
-	// Redis connection pool init
-	if sC.redisStore && daoIns.redisClient == nil {
-		daoIns.ctx = context.TODO()
-		daoIns.redisClient = redis.NewClient(&redis.Options{
-			Addr:     sC.host,
-			Password: sC.password,
-			DB:       0,
-		})
-		if err = daoIns.redisClient.Ping(daoIns.ctx).Err(); err != nil {
+		err = daoIns.DB.Ping()
+		if err != nil {
 			return
 		}
+		defer daoIns.DB.Close()
 	}
-	switch sC.name {
+	// Redis connection pool init
+	if sc.RedisStore {
+		daoIns.Ctx = context.TODO()
+		daoIns.RedisClient = redis.NewClient(&redis.Options{
+			Addr:     sc.Host,
+			Password: sc.Password,
+			DB:       0,
+		})
+		if err = daoIns.RedisClient.Ping(daoIns.Ctx).Err(); err != nil {
+			return
+		}
+		defer daoIns.RedisClient.Close()
+	}
+	switch sc.Name {
 	case "ClientPortal":
-		ac, err = ClientPortal(daoIns.db, gateway).Actions()
+		ac, err = ClientPortal(&daoIns).Actions()
 	case "ContentManager":
-		ac, err = ContentManager(daoIns.db, gateway).Actions()
+		ac, err = ContentManager(&daoIns).Actions()
 	case "EmployeePortal":
-		ac, err = EmployeePortal(daoIns.db, gateway).Actions()
+		ac, err = EmployeePortal(&daoIns).Actions()
 	case "LogManager":
-		ac, err = LogManager(daoIns.db, gateway).Actions()
+		ac, err = LogManager(&daoIns).Actions()
 	case "ProducerPortal":
-		ac, err = ProducerPortal(daoIns.db, gateway).Actions()
+		ac, err = ProducerPortal(&daoIns).Actions()
 	case "SessionManager":
-		ac, err = SessionManager(daoIns.redisClient, gateway).Actions()
+		ac, err = SessionManager(&daoIns).Actions()
 	case "TransactionManager":
-		ac, err = TransactionManager(daoIns.db, gateway).Actions()
+		ac, err = TransactionManager(&daoIns).Actions()
 	}
 	return
 }

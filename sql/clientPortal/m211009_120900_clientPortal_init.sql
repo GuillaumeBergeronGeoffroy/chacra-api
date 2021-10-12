@@ -1,7 +1,7 @@
 CREATE TABLE User (
-    userId INT NOT NULL AUTO_INCREMENT,
-    userEmail VARCHAR(255) NOT NULL,
-    userPassword VARCHAR(255) NOT NULL,
-    PRIMARY KEY (userId),
-    CONSTRAINT uidx_User_userEmail UNIQUE userEmail)
+    UserId INT NOT NULL AUTO_INCREMENT,
+    UserEmail VARCHAR(255) NOT NULL,
+    UserPassword VARCHAR(255) NOT NULL,
+    PRIMARY KEY (UserId),
+    CONSTRAINT uidx_User_UserEmail UNIQUE (UserEmail)
 );

@@ -2,7 +2,7 @@ package models
 
 // Product model exportable
 type Product struct {
-	productId     uint32
-	producerId    uint32
-	productStatus uint8
+	ProductId     uint32
+	ProducerId    uint32
+	ProductStatus uint8
 }

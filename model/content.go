@@ -2,11 +2,11 @@ package models
 
 // Content model exportable
 type Content struct {
-	contentId          uint32
-	contentModel       string
-	contentModelId     uint32
-	contentModelTypeId uint8
-	contentLang        string
-	contentValue       string
-	contentStatus      uint8
+	ContentId          uint32
+	ContentModel       string
+	ContentModelId     uint32
+	ContentModelTypeId uint8
+	ContentLang        string
+	ContentValue       string
+	ContentStatus      uint8
 }

@@ -1,24 +1,22 @@
 package service
 
 import (
-	"database/sql"
 	"sync"
 )
 
 type clientPortal struct {
-	db      *sql.DB
-	gateway map[string]string
+	Dao *Dao
 }
 
 var cpOnce sync.Once
 var cp clientPortal
 
 // ClientPortal singleton exportable
-func ClientPortal(db *sql.DB, gateway map[string]string) clientPortal {
+func ClientPortal(dao *Dao) *clientPortal {
 	cpOnce.Do(func() {
-		cp = clientPortal{db, gateway}
+		cp = clientPortal{dao}
 	})
-	return cp
+	return &cp
 }
 
 // ClientPortalActions exportable

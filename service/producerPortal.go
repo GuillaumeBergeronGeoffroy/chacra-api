@@ -1,24 +1,22 @@
 package service
 
 import (
-	"database/sql"
 	"sync"
 )
 
 type producerPortal struct {
-	db      *sql.DB
-	gateway map[string]string
+	Dao *Dao
 }
 
 var ppOnce sync.Once
 var pp producerPortal
 
 // ProducerPortal exportable singleton
-func ProducerPortal(db *sql.DB, gateway map[string]string) producerPortal {
+func ProducerPortal(dao *Dao) *producerPortal {
 	ppOnce.Do(func() {
-		pp = producerPortal{db, gateway}
+		pp = producerPortal{dao}
 	})
-	return pp
+	return &pp
 }
 
 // ProducerPortalActions exportable

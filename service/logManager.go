@@ -1,24 +1,22 @@
 package service
 
 import (
-	"database/sql"
 	"sync"
 )
 
 type logManager struct {
-	db      *sql.DB
-	gateway map[string]string
+	Dao *Dao
 }
 
 var lmOnce sync.Once
 var lm logManager
 
 // LogManager exportable singleton
-func LogManager(db *sql.DB, gateway map[string]string) logManager {
+func LogManager(dao *Dao) *logManager {
 	lmOnce.Do(func() {
-		lm = logManager{db, gateway}
+		lm = logManager{dao}
 	})
-	return lm
+	return &lm
 }
 
 // LogManagerActions exportable

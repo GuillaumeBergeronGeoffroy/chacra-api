@@ -1,24 +1,22 @@
 package service
 
 import (
-	"database/sql"
 	"sync"
 )
 
 type transactionManager struct {
-	db      *sql.DB
-	gateway map[string]string
+	Dao *Dao
 }
 
 var tmOnce sync.Once
 var tm transactionManager
 
 // TransactionManager exportable singleton
-func TransactionManager(db *sql.DB, gateway map[string]string) transactionManager {
+func TransactionManager(dao *Dao) *transactionManager {
 	tmOnce.Do(func() {
-		tm = transactionManager{db, gateway}
+		tm = transactionManager{dao}
 	})
-	return tm
+	return &tm
 }
 
 // TransactionManagerActions exportable

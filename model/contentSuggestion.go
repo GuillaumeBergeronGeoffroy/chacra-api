@@ -2,7 +2,7 @@ package models
 
 // ContentSuggestion model exportable
 type ContentSuggestion struct {
-	contentSuggestionId    uint32
-	contentId              uint32
-	contentSuggestionValue string
+	ContentSuggestionId    uint32
+	ContentId              uint32
+	ContentSuggestionValue string
 }

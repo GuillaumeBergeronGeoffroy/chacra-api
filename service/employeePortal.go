@@ -1,24 +1,22 @@
 package service
 
 import (
-	"database/sql"
 	"sync"
 )
 
 type employeePortal struct {
-	db      *sql.DB
-	gateway map[string]string
+	Dao *Dao
 }
 
 var epOnce sync.Once
 var ep employeePortal
 
 // EmployeePortal exportable singleton
-func EmployeePortal(db *sql.DB, gateway map[string]string) employeePortal {
+func EmployeePortal(dao *Dao) *employeePortal {
 	epOnce.Do(func() {
-		ep = employeePortal{db, gateway}
+		ep = employeePortal{dao}
 	})
-	return ep
+	return &ep
 }
 
 // EmployeePortalActions exportable

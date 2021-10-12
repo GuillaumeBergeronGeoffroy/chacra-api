@@ -10,20 +10,30 @@ import (
 )
 
 type Config struct {
-	services []s.ServiceConfig
-	gateway  map[string]string
+	Services []s.ServiceConfig
+	Gateway  map[string]string
+}
+
+func loadConfig() (config Config, err error) {
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
+	viper.AutomaticEnv()
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+	err = viper.Unmarshal(&config)
+	return
 }
 
 func main() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	viper.WatchConfig()
-	viper.AutomaticEnv()
-	viper.SetConfigType("yml")
-	config := Config{}
-	viper.Unmarshal(&config)
-	for _, service := range config.services {
-		actions, err := s.InitService(service, config.gateway)
+	config, err := loadConfig()
+	if err != nil || len(config.Services) == 0 {
+		println("Error while reading env file:", err)
+	}
+	for _, service := range config.Services {
+		actions, err := s.InitService(service, config.Gateway)
 		if err != nil {
 			fmt.Println("Error while initializing service: ", err)
 			continue
