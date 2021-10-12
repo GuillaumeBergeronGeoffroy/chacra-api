@@ -1,14 +1,27 @@
 package service
 
-import "database/sql"
+import (
+	"database/sql"
+	"sync"
+)
 
-// LogManager exportable
-type LogManager struct {
-	DB    *sql.DB
-	links map[string]string
+type logManager struct {
+	db      *sql.DB
+	gateway map[string]string
+}
+
+var lmOnce sync.Once
+var lm logManager
+
+// LogManager exportable singleton
+func LogManager(db *sql.DB, gateway map[string]string) logManager {
+	lmOnce.Do(func() {
+		lm = logManager{db, gateway}
+	})
+	return lm
 }
 
 // LogManagerActions exportable
-func (m LogManager) Actions() (ac Actions, err error) {
+func (m logManager) Actions() (ac Actions, err error) {
 	return
 }

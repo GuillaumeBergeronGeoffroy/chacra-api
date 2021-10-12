@@ -1,14 +1,27 @@
 package service
 
-import "database/sql"
+import (
+	"database/sql"
+	"sync"
+)
 
-// ProducerPortal exportable
-type ProducerPortal struct {
-	DB    *sql.DB
-	links map[string]string
+type producerPortal struct {
+	db      *sql.DB
+	gateway map[string]string
+}
+
+var ppOnce sync.Once
+var pp producerPortal
+
+// ProducerPortal exportable singleton
+func ProducerPortal(db *sql.DB, gateway map[string]string) producerPortal {
+	ppOnce.Do(func() {
+		pp = producerPortal{db, gateway}
+	})
+	return pp
 }
 
 // ProducerPortalActions exportable
-func (m ProducerPortal) Actions() (ac Actions, err error) {
+func (m producerPortal) Actions() (ac Actions, err error) {
 	return
 }

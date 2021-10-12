@@ -2,15 +2,26 @@ package service
 
 import (
 	"database/sql"
+	"sync"
 )
 
-// ContentManager exportable
-type ContentManager struct {
-	DB    *sql.DB
-	links map[string]string
+type contentManager struct {
+	db      *sql.DB
+	gateway map[string]string
+}
+
+var cmOnce sync.Once
+var cm contentManager
+
+// ContentManager singleton exportable
+func ContentManager(db *sql.DB, gateway map[string]string) contentManager {
+	cmOnce.Do(func() {
+		cm = contentManager{db, gateway}
+	})
+	return cm
 }
 
 // ContentManagerActions exportable
-func (m ContentManager) Actions() (ac Actions, err error) {
+func (m contentManager) Actions() (ac Actions, err error) {
 	return
 }

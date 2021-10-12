@@ -19,7 +19,6 @@ type ServiceConfig struct {
 	password   string
 	mysqldb    bool
 	redisStore bool
-	links      map[string]string
 }
 
 // Action exportable
@@ -34,10 +33,10 @@ type dao struct {
 	redisClient *redis.Client
 }
 
-var daoIns = dao{}  
+var daoIns = dao{}
 
 // InitService exportable
-func InitService(sC ServiceConfig) (ac Actions, err error) {
+func InitService(sC ServiceConfig, gateway map[string]string) (ac Actions, err error) {
 	// Mysql connection pool init
 	if sC.mysqldb && daoIns.db == nil {
 		daoIns.db, err = sql.Open("mysql", sC.user+"@"+sC.password)
@@ -59,19 +58,19 @@ func InitService(sC ServiceConfig) (ac Actions, err error) {
 	}
 	switch sC.name {
 	case "ClientPortal":
-		ac, err = ClientPortal{daoIns.db, sC.links}.Actions()
+		ac, err = ClientPortal(daoIns.db, gateway).Actions()
 	case "ContentManager":
-		ac, err = ContentManager{daoIns.db, sC.links}.Actions()
+		ac, err = ContentManager(daoIns.db, gateway).Actions()
 	case "EmployeePortal":
-		ac, err = EmployeePortal{daoIns.db, sC.links}.Actions()
+		ac, err = EmployeePortal(daoIns.db, gateway).Actions()
 	case "LogManager":
-		ac, err = LogManager{daoIns.db, sC.links}.Actions()
+		ac, err = LogManager(daoIns.db, gateway).Actions()
 	case "ProducerPortal":
-		ac, err = ProducerPortal{daoIns.db, sC.links}.Actions()
+		ac, err = ProducerPortal(daoIns.db, gateway).Actions()
 	case "SessionManager":
-		ac, err = SessionManager{daoIns.redisClient, sC.links}.Actions()
+		ac, err = SessionManager(daoIns.redisClient, gateway).Actions()
 	case "TransactionManager":
-		ac, err = TransactionManager{daoIns.db, sC.links}.Actions()
+		ac, err = TransactionManager(daoIns.db, gateway).Actions()
 	}
 	return
 }

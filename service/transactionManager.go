@@ -1,14 +1,27 @@
 package service
 
-import "database/sql"
+import (
+	"database/sql"
+	"sync"
+)
 
-// TransactionManager exportable
-type TransactionManager struct {
-	DB    *sql.DB
-	links map[string]string
+type transactionManager struct {
+	db      *sql.DB
+	gateway map[string]string
 }
 
-// ProducerPortalActions exportable
-func (m TransactionManager) Actions() (ac Actions, err error) {
+var tmOnce sync.Once
+var tm transactionManager
+
+// TransactionManager exportable singleton
+func TransactionManager(db *sql.DB, gateway map[string]string) transactionManager {
+	tmOnce.Do(func() {
+		tm = transactionManager{db, gateway}
+	})
+	return tm
+}
+
+// TransactionManagerActions exportable
+func (m transactionManager) Actions() (ac Actions, err error) {
 	return
 }

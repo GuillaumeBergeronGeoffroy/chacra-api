@@ -1,14 +1,27 @@
 package service
 
-import "database/sql"
+import (
+	"database/sql"
+	"sync"
+)
 
-// EmployeePortal exportable
-type EmployeePortal struct {
-	DB    *sql.DB
-	links map[string]string
+type employeePortal struct {
+	db      *sql.DB
+	gateway map[string]string
+}
+
+var epOnce sync.Once
+var ep employeePortal
+
+// EmployeePortal exportable singleton
+func EmployeePortal(db *sql.DB, gateway map[string]string) employeePortal {
+	epOnce.Do(func() {
+		ep = employeePortal{db, gateway}
+	})
+	return ep
 }
 
 // EmployeePortalActions exportable
-func (m EmployeePortal) Actions() (ac Actions, err error) {
+func (m employeePortal) Actions() (ac Actions, err error) {
 	return
 }

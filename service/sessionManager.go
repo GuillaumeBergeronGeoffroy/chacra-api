@@ -1,14 +1,28 @@
 package service
 
-import "github.com/go-redis/redis/v8"
+import (
+	"sync"
 
-// ProducerPortal exportable
-type SessionManager struct {
+	"github.com/go-redis/redis/v8"
+)
+
+type sessionManager struct {
 	redisClient *redis.Client
-	links       map[string]string
+	gateway     map[string]string
 }
 
-// SessionManager exportable
-func (m SessionManager) Actions() (ac Actions, err error) {
+var smOnce sync.Once
+var sm sessionManager
+
+// SessionManager exportable singleton
+func SessionManager(redisClient *redis.Client, gateway map[string]string) sessionManager {
+	smOnce.Do(func() {
+		sm = sessionManager{redisClient, gateway}
+	})
+	return sm
+}
+
+// SessionManagerActions exportable
+func (m sessionManager) Actions() (ac Actions, err error) {
 	return
 }

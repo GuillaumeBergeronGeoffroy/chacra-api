@@ -10,7 +10,8 @@ import (
 )
 
 type Config struct {
-	ServicesConfig []s.ServiceConfig
+	services []s.ServiceConfig
+	gateway  map[string]string
 }
 
 func main() {
@@ -21,13 +22,13 @@ func main() {
 	viper.SetConfigType("yml")
 	config := Config{}
 	viper.Unmarshal(&config)
-	for _, serviceConfig := range config.ServicesConfig {
-		serviceActions, err := s.InitService(serviceConfig)
+	for _, service := range config.services {
+		actions, err := s.InitService(service, config.gateway)
 		if err != nil {
 			fmt.Println("Error while initializing service: ", err)
 			continue
 		}
-		for route, action := range serviceActions {
+		for route, action := range actions {
 			http.HandleFunc(route, action)
 		}
 	}
