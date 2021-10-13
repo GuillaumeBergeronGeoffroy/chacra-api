@@ -15,6 +15,7 @@ var lm logManager
 func LogManager(dao *Dao) *logManager {
 	lmOnce.Do(func() {
 		lm = logManager{dao}
+		InitServiceSqlDB(lm.Dao.DB, lmInitSql)
 	})
 	return &lm
 }
@@ -23,3 +24,5 @@ func LogManager(dao *Dao) *logManager {
 func (m logManager) Actions() (ac Actions, err error) {
 	return
 }
+
+var lmInitSql = []string{}

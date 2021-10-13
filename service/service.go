@@ -6,7 +6,9 @@ package service
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
@@ -35,6 +37,19 @@ type Dao struct {
 	Ctx         context.Context
 	RedisClient *redis.Client
 	Gateway     map[string]string
+}
+
+// InitServiceSqlDB exportable
+func InitServiceSqlDB(db *sql.DB, stmts []string) {
+	for _, stmt := range stmts {
+		ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancelfunc()
+		_, err := db.ExecContext(ctx, stmt)
+		if err != nil {
+			log.Printf("Error %s when creating product table", err)
+			return
+		}
+	}
 }
 
 // InitService exportable
