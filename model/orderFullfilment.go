@@ -1,4 +1,4 @@
-package models
+package model
 
 // OrderFullfilment model exportable
 type OrderFullfilment struct {
@@ -6,4 +6,9 @@ type OrderFullfilment struct {
 	OrderFullfilmentOptionTypeId uint8
 	OrderId                      uint32
 	OrderFullfilmentStatus       uint8
+}
+
+// OrderFullfilmentValidate exportable
+func (m OrderFullfilment) Validate() (err error) {
+	return
 }

@@ -1,4 +1,4 @@
-package models
+package model
 
 // Producer model exportable
 type Producer struct {
@@ -6,4 +6,9 @@ type Producer struct {
 	ProducerEmail    string
 	ProducerPassword string
 	ProducerStatus   uint8
+}
+
+// ProducerValidate exportable
+func (m Producer) Validate() (err error) {
+	return
 }

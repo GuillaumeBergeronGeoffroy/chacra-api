@@ -1,4 +1,4 @@
-package models
+package model
 
 import "time"
 
@@ -9,4 +9,9 @@ type ProductAvailability struct {
 	ProductAvailabilityQuantity uint16
 	ProductAvailabilityStart    time.Time
 	ProductAvailabilityEnd      time.Time
+}
+
+// ProductAvailabilityValidate exportable
+func (m ProductAvailability) Validate() (err error) {
+	return
 }

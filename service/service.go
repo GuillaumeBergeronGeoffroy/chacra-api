@@ -25,6 +25,11 @@ type ServiceConfig struct {
 	RedisStore bool
 }
 
+// Service Exportable
+type Service interface {
+	Actions(ac Actions, err error)
+}
+
 // Action exportable
 type Action func(w http.ResponseWriter, r *http.Request)
 

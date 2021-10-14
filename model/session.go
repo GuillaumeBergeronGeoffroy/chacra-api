@@ -1,4 +1,4 @@
-package models
+package model
 
 // Session model exportable
 type Session struct {
@@ -6,4 +6,9 @@ type Session struct {
 	UserId     uint32
 	ProducerId uint32
 	EmployeeId uint32
+}
+
+// SessionValidate exportable
+func (m Session) Validate() (err error) {
+	return
 }
