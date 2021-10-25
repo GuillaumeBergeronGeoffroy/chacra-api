@@ -15,7 +15,7 @@ var ep employeePortal
 func EmployeePortal(dao *Dao) *employeePortal {
 	epOnce.Do(func() {
 		ep = employeePortal{dao}
-		InitServiceSqlDB(ep.Dao.DB, epInitSql)
+		ExecuteStatements(ep.Dao.DB, epInitSql)
 	})
 	return &ep
 }

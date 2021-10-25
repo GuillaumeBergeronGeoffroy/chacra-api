@@ -15,7 +15,7 @@ var cm contentManager
 func ContentManager(dao *Dao) *contentManager {
 	cmOnce.Do(func() {
 		cm = contentManager{dao}
-		InitServiceSqlDB(cm.Dao.DB, cmInitSql)
+		ExecuteStatements(cm.Dao.DB, cmInitSql)
 	})
 	return &cm
 }

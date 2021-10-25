@@ -1,6 +1,7 @@
 package service
 
 import (
+	"net/http"
 	"sync"
 )
 
@@ -15,13 +16,24 @@ var pp producerPortal
 func ProducerPortal(dao *Dao) *producerPortal {
 	ppOnce.Do(func() {
 		pp = producerPortal{dao}
-		InitServiceSqlDB(pp.Dao.DB, ppInitSql)
+		ExecuteStatements(pp.Dao.DB, ppInitSql)
 	})
 	return &pp
 }
 
 // ProducerPortalActions exportable
 func (m producerPortal) Actions() (ac Actions, err error) {
+	ac = map[string]Action{
+		"createProducer": func(w http.ResponseWriter, r *http.Request) {
+			// reqBody := u.Read(w, r)
+			// resBody, err := subscribe(reqBody, m)
+			// if err != nil {
+			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+			// 	return
+			// }
+			// u.Write(w, r, resBody)
+		},
+	}
 	return
 }
 

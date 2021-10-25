@@ -15,7 +15,7 @@ var lm logManager
 func LogManager(dao *Dao) *logManager {
 	lmOnce.Do(func() {
 		lm = logManager{dao}
-		InitServiceSqlDB(lm.Dao.DB, lmInitSql)
+		ExecuteStatements(lm.Dao.DB, lmInitSql)
 	})
 	return &lm
 }

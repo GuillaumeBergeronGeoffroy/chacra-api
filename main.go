@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	s "github.com/GuillaumeBergeronGeoffroy/chacra-api/service"
+	"github.com/rs/cors"
 
 	"github.com/spf13/viper"
 )
@@ -32,15 +33,21 @@ func main() {
 	if err != nil || len(config.Services) == 0 {
 		println("Error while reading env file:", err)
 	}
+	mux := http.NewServeMux()
+	// have the allowed origin be the Gateway map
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:8080"},
+	})
 	for _, service := range config.Services {
 		actions, err := s.InitService(service, config.Gateway)
 		if err != nil {
-			fmt.Println("Error while initializing service: ", err)
+			fmt.Println("Error while initializing ", service.Name, ":", err)
 			continue
 		}
 		for route, action := range actions {
-			http.HandleFunc(route, action)
+			mux.HandleFunc("/"+route, action)
 		}
 	}
-	http.ListenAndServe(":3000", nil)
+	handler := c.Handler(mux)
+	http.ListenAndServe(":3000", handler)
 }

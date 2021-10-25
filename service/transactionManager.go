@@ -15,7 +15,7 @@ var tm transactionManager
 func TransactionManager(dao *Dao) *transactionManager {
 	tmOnce.Do(func() {
 		tm = transactionManager{dao}
-		InitServiceSqlDB(tm.Dao.DB, tmInitSql)
+		ExecuteStatements(tm.Dao.DB, tmInitSql)
 	})
 	return &tm
 }
