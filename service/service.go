@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -47,6 +48,7 @@ type RateEntry struct {
 
 // RateLimiter exportable
 type RateLimiter struct {
+	mu        sync.Mutex
 	RateMap   map[string]RateEntry
 	RateDelay float64
 	BanDelay  float64
@@ -68,6 +70,8 @@ func EvalRateLimit(r *http.Request, rateLimiter *RateLimiter) (err error) {
 	if ip == "" {
 		return
 	}
+	rateLimiter.mu.Lock()
+	defer rateLimiter.mu.Unlock()
 	if rateEntry, ok := rateLimiter.RateMap[ip]; ok {
 		if rateEntry.Ban == true {
 			if time.Now().Sub(rateEntry.LastAction).Seconds() > rateLimiter.BanDelay {

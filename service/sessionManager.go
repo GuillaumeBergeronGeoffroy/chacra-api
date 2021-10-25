@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	s "github.com/GuillaumeBergeronGeoffroy/chacra-api/model"
 	u "github.com/GuillaumeBergeronGeoffroy/chacra-api/util"
 )
 
@@ -13,14 +14,27 @@ type sessionManager struct {
 	Dao *Dao
 }
 
+type SessionMap struct {
+	mu sync.RWMutex
+	v  map[string]s.Session
+}
+
+// mutex.RLock()
+// defer mutex.RUnlock()
+
+// mutex.Lock()
+// defer mutex.Unlock()
+
 var smOnce sync.Once
 var sm sessionManager
+var sMap SessionMap
 
 // SessionManager exportable singleton
 func SessionManager(dao *Dao) *sessionManager {
 	smOnce.Do(func() {
 		sm = sessionManager{dao}
 		dao.RateLimiter = &RateLimiter{RateMap: map[string]RateEntry{}, RateDelay: 120, BanDelay: 60 * 60, Limit: 12}
+		sMap = SessionMap{v: map[string]s.Session{}}
 	})
 	return &sm
 }
@@ -76,13 +90,11 @@ func (m sessionManager) Actions() (ac Actions, err error) {
 				return
 			}
 			u.Write(w, r, resBody)
-			return
 		},
-		"authentify": func(w http.ResponseWriter, r *http.Request) {
-			return
-		},
+		"authentify": func(w http.ResponseWriter, r *http.Request) {},
 		"authorize": func(w http.ResponseWriter, r *http.Request) {
-			return
+			sMap.mu.RLock()
+			sMap.mu.RUnlock()
 		},
 	}
 	return
