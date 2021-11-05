@@ -44,6 +44,7 @@ type SubscribeRequest struct {
 	ProducerEmail    string `json:"producerEmail,omitempty"`
 	UserPassword     string `json:"userPassword,omitempty"`
 	ProducerPassword string `json:"producerPassword,omitempty"`
+	Status           string
 }
 
 func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
@@ -54,17 +55,17 @@ func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
 	}
 	var gateway string
 	var endRoute string
-	if s.ProducerEmail != "" && s.ProducerPassword != "" {
-		gateway = "ProducerClient"
+	if s.ProducerEmail != "" {
+		gateway = "ProducerPortal"
 		endRoute = "/createProducer"
-	} else if s.UserEmail != "" && s.UserPassword != "" {
-		gateway = "UserClient"
+	} else if s.UserEmail != "" {
+		gateway = "ClientPortal"
 		endRoute = "/createUser"
 	} else {
 		err = errors.New("invalid submission format")
 		return
 	}
-	resStatus, resBody, err := u.Request(m.Dao.Gateway[gateway]+endRoute, reqBody)
+	resStatus, resBody, err := u.Request(m.Dao.HttpClient, m.Dao.Gateway[gateway]+endRoute, reqBody)
 	if resStatus < 200 || resStatus > 299 {
 		err = errors.New("something went wrong")
 	}
@@ -75,21 +76,23 @@ func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
 func (m sessionManager) Actions() (ac Actions, err error) {
 	ac = map[string]Action{
 		"subscribe": func(w http.ResponseWriter, r *http.Request) {
-			err = EvalRateLimit(r, m.Dao.RateLimiter)
-			if err != nil {
-				u.Write(w, r, u.ComposeResponse(w, map[string]string{
-					"message": err.Error(),
-					"success": "false",
-				}))
-				return
-			}
+			// err = EvalRateLimit(r, m.Dao.RateLimiter)
+			// if err != nil {
+			// 	u.WriteJSON(w, r, u.ComposeResponse(w, map[string]string{
+			// 		"message": err.Error(),
+			// 		"success": "false",
+			// 	}))
+			// }
 			reqBody := u.Read(w, r)
-			resBody, err := subscribe(reqBody, m)
+			_, err := subscribe(reqBody, m)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			u.Write(w, r, resBody)
+			u.WriteJSON(w, r, u.ComposeResponse(w, map[string]string{
+				"message": "Bienvenue.",
+				"success": "true",
+			}))
 		},
 		"authentify": func(w http.ResponseWriter, r *http.Request) {},
 		"authorize": func(w http.ResponseWriter, r *http.Request) {

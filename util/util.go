@@ -35,23 +35,21 @@ func Read(w http.ResponseWriter, r *http.Request) (reqBody []byte) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 	return
 }
 
-// Write exportable
-func Write(w http.ResponseWriter, r *http.Request, resBody []byte) {
+// WriteJSON exportable
+func WriteJSON(w http.ResponseWriter, r *http.Request, resBody []byte) {
 	if resBody != nil {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(resBody)
 	}
 }
 
 // Request exportable
-func Request(route string, reqBody []byte) (resStatusCode int, resBody []byte, err error) {
-	resp, err := http.Post(route, "application/json", bytes.NewBuffer(reqBody))
+func Request(netClient *http.Client, route string, reqBody []byte) (resStatusCode int, resBody []byte, err error) {
+	resp, err := netClient.Post(route, "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		return
 	}

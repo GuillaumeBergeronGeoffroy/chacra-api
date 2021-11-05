@@ -28,10 +28,11 @@ func (m producerPortal) Actions() (ac Actions, err error) {
 			// reqBody := u.Read(w, r)
 			// resBody, err := subscribe(reqBody, m)
 			// if err != nil {
-			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-			// 	return
+			// http.Error(w, err.Error(), http.StatusInternalServerError)
+			// return
 			// }
 			// u.Write(w, r, resBody)
+			w.WriteHeader(500)
 		},
 	}
 	return
@@ -44,8 +45,8 @@ var ppInitSql = []string{
 	`CREATE TABLE Producer (
 		ProducerId INT NOT NULL AUTO_INCREMENT,
 		ProducerEmail VARCHAR(255) NOT NULL,
-		ProducerPassword VARCHAR(255) NOT NULL,
-		ProducerCreated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		ProducerPassword VARCHAR(255),
+		ProducerCreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 		ProducerStatus TINYINT DEFAULT 0,
 		PRIMARY KEY (ProducerId),
 		CONSTRAINT uidx_Producer_ProducerEmail UNIQUE (ProducerEmail)

@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -62,10 +63,12 @@ type Dao struct {
 	RedisClient *redis.Client
 	Gateway     map[string]string
 	RateLimiter *RateLimiter
+	HttpClient  *http.Client
 }
 
 // EvalRateLimit exportable
 func EvalRateLimit(r *http.Request, rateLimiter *RateLimiter) (err error) {
+	fmt.Println(rateLimiter.RateMap)
 	ip := u.ReadUserIP(r)
 	if ip == "" {
 		return
@@ -103,10 +106,15 @@ func ExecuteStatements(db *sql.DB, stmts []string) (err error) {
 		defer cancelfunc()
 		_, err = db.ExecContext(ctx, stmt)
 		if err != nil {
+			fmt.Println("ResStatus:", err)
 			return
 		}
 	}
 	return
+}
+
+var netClient = &http.Client{
+	Timeout: time.Second * 10,
 }
 
 // InitService exportable
@@ -114,6 +122,8 @@ func InitService(sc ServiceConfig, gateway map[string]string) (ac Actions, err e
 	var daoIns = Dao{}
 	// Set Gateway
 	daoIns.Gateway = gateway
+	// The HTTPClient
+	daoIns.HttpClient = netClient
 	// Mysql connection pool init
 	if sc.Mysqldb {
 		daoIns.DB, err = sql.Open("mysql", sc.User+":"+sc.Password+"@tcp("+sc.Host+":"+sc.Port+")/chacra")
@@ -124,7 +134,6 @@ func InitService(sc ServiceConfig, gateway map[string]string) (ac Actions, err e
 		if err != nil {
 			return
 		}
-		defer daoIns.DB.Close()
 	}
 	// Redis connection pool init
 	if sc.RedisStore {
@@ -137,7 +146,6 @@ func InitService(sc ServiceConfig, gateway map[string]string) (ac Actions, err e
 		if err = daoIns.RedisClient.Ping(daoIns.Ctx).Err(); err != nil {
 			return
 		}
-		defer daoIns.RedisClient.Close()
 	}
 	switch sc.Name {
 	case "ClientPortal":

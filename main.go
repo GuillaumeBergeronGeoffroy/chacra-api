@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	s "github.com/GuillaumeBergeronGeoffroy/chacra-api/service"
@@ -49,5 +50,5 @@ func main() {
 		}
 	}
 	handler := c.Handler(mux)
-	http.ListenAndServe(":3000", handler)
+	log.Fatal(http.ListenAndServe(":3000", handler))
 }
