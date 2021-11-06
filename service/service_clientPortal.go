@@ -2,11 +2,11 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 
-	u "github.com/GuillaumeBergeronGeoffroy/chacra-api/util"
-	"golang.org/x/crypto/bcrypt"
+	model "github.com/GuillaumeBergeronGeoffroy/chacra-api/model"
 )
 
 type clientPortal struct {
@@ -29,33 +29,17 @@ func ClientPortal(dao *Dao) *clientPortal {
 func (m clientPortal) Actions() (ac Actions, err error) {
 	ac = map[string]Action{
 		"createUser": func(w http.ResponseWriter, r *http.Request) {
-			s := &SubscribeRequest{}
-			reqBody := u.Read(w, r)
-			err = json.Unmarshal([]byte(reqBody), s)
+			user := &model.User{}
+			reqBody := Read(w, r)
+			err = json.Unmarshal([]byte(reqBody), user)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			// check if user exists
-			// Validate email and password
-			var insertStmt string
-			if s.UserPassword == "" {
-				insertStmt = "INSERT INTO User (UserEmail, UserStatus) VALUES ('" + s.UserEmail + "', 0)"
-			} else {
-				hashedPassword, err := bcrypt.GenerateFromPassword([]byte(s.UserPassword), bcrypt.DefaultCost)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-				insertStmt = "INSERT INTO User (UserEmail, UserPassword, UserStatus) VALUES ('" + s.UserEmail + "','" + string(hashedPassword) + "', 1)"
-			}
-			stmt := []string{
-				insertStmt,
-			}
-			err = ExecuteStatements(m.Dao.DB, stmt)
+			fmt.Println(user)
+			err = SaveModel(user, m.Dao.DB)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
 			}
 		},
 	}

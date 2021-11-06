@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	s "github.com/GuillaumeBergeronGeoffroy/chacra-api/model"
-	u "github.com/GuillaumeBergeronGeoffroy/chacra-api/util"
 )
 
 type sessionManager struct {
@@ -39,7 +38,38 @@ func SessionManager(dao *Dao) *sessionManager {
 	return &sm
 }
 
-type SubscribeRequest struct {
+// SessionManagerActions exportable
+func (m sessionManager) Actions() (ac Actions, err error) {
+	ac = map[string]Action{
+		"authentify": func(w http.ResponseWriter, r *http.Request) {},
+		"authorize": func(w http.ResponseWriter, r *http.Request) {
+			sMap.mu.RLock()
+			sMap.mu.RUnlock()
+		},
+		"subscribe": func(w http.ResponseWriter, r *http.Request) {
+			// err = EvalRateLimit(r, m.Dao.RateLimiter)
+			// if err != nil {
+			// 	u.WriteJSON(w, r, u.ComposeResponse(w, map[string]string{
+			// 		"message": err.Error(),
+			// 		"success": "false",
+			// 	}))
+			// }
+			reqBody := Read(w, r)
+			_, err := subscribe(reqBody, m)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			WriteJSON(w, r, ComposeResponse(w, map[string]string{
+				"message": "Bienvenue.",
+				"success": "true",
+			}))
+		},
+	}
+	return
+}
+
+type subscribeRequest struct {
 	UserEmail        string `json:"userEmail,omitempty"`
 	ProducerEmail    string `json:"producerEmail,omitempty"`
 	UserPassword     string `json:"userPassword,omitempty"`
@@ -48,7 +78,7 @@ type SubscribeRequest struct {
 }
 
 func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
-	s := &SubscribeRequest{}
+	s := &subscribeRequest{}
 	err = json.Unmarshal([]byte(reqBody), s)
 	if err != nil {
 		return
@@ -65,40 +95,9 @@ func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
 		err = errors.New("invalid submission format")
 		return
 	}
-	resStatus, resBody, err := u.Request(m.Dao.HttpClient, m.Dao.Gateway[gateway]+endRoute, reqBody)
+	resStatus, resBody, err := Request(m.Dao.HttpClient, m.Dao.Gateway[gateway]+endRoute, reqBody)
 	if resStatus < 200 || resStatus > 299 {
 		err = errors.New("something went wrong")
-	}
-	return
-}
-
-// SessionManagerActions exportable
-func (m sessionManager) Actions() (ac Actions, err error) {
-	ac = map[string]Action{
-		"subscribe": func(w http.ResponseWriter, r *http.Request) {
-			// err = EvalRateLimit(r, m.Dao.RateLimiter)
-			// if err != nil {
-			// 	u.WriteJSON(w, r, u.ComposeResponse(w, map[string]string{
-			// 		"message": err.Error(),
-			// 		"success": "false",
-			// 	}))
-			// }
-			reqBody := u.Read(w, r)
-			_, err := subscribe(reqBody, m)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			u.WriteJSON(w, r, u.ComposeResponse(w, map[string]string{
-				"message": "Bienvenue.",
-				"success": "true",
-			}))
-		},
-		"authentify": func(w http.ResponseWriter, r *http.Request) {},
-		"authorize": func(w http.ResponseWriter, r *http.Request) {
-			sMap.mu.RLock()
-			sMap.mu.RUnlock()
-		},
 	}
 	return
 }

@@ -1,21 +1,33 @@
 /*
-	Package service ...
+	Package service
+		- service
+			built to be run independantly, defined by config, need gateway map to other services
+				structure
+					parts by hierarchy
+					singleton init
+					Actions by name (alphabelical)
+					functions used by the Actions in order of appearance
+					service init sql stmt
+		- helper
+			grouped functions
+				structure
+					by name (alphabelical)
+		- tools
+			object groups logic that solves a problem
+				structure
+					parts by hierarchy
+					funcs by name (alphabelical)
 */
 package service
 
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
-
-	u "github.com/GuillaumeBergeronGeoffroy/chacra-api/util"
 )
 
 // ServiceConfig exportable
@@ -40,22 +52,6 @@ type Action func(w http.ResponseWriter, r *http.Request)
 // Actions exportable
 type Actions map[string]Action
 
-// RateEntry exportable
-type RateEntry struct {
-	Count      int
-	LastAction time.Time
-	Ban        bool
-}
-
-// RateLimiter exportable
-type RateLimiter struct {
-	mu        sync.Mutex
-	RateMap   map[string]RateEntry
-	RateDelay float64
-	BanDelay  float64
-	Limit     int
-}
-
 // Dao exportable
 type Dao struct {
 	DB          *sql.DB
@@ -64,53 +60,6 @@ type Dao struct {
 	Gateway     map[string]string
 	RateLimiter *RateLimiter
 	HttpClient  *http.Client
-}
-
-// EvalRateLimit exportable
-func EvalRateLimit(r *http.Request, rateLimiter *RateLimiter) (err error) {
-	fmt.Println(rateLimiter.RateMap)
-	ip := u.ReadUserIP(r)
-	if ip == "" {
-		return
-	}
-	rateLimiter.mu.Lock()
-	defer rateLimiter.mu.Unlock()
-	if rateEntry, ok := rateLimiter.RateMap[ip]; ok {
-		if rateEntry.Ban == true {
-			if time.Now().Sub(rateEntry.LastAction).Seconds() > rateLimiter.BanDelay {
-				rateLimiter.RateMap[ip] = RateEntry{Count: 1, LastAction: time.Now(), Ban: false}
-				err = errors.New("gotta go fast")
-			}
-		} else {
-			if time.Now().Sub(rateEntry.LastAction).Seconds() > rateLimiter.RateDelay {
-				rateLimiter.RateMap[ip] = RateEntry{Count: 1, LastAction: time.Now(), Ban: false}
-				err = errors.New("gotta go fast")
-			} else {
-				if rateLimiter.RateMap[ip].Count+1 > rateLimiter.Limit {
-					rateLimiter.RateMap[ip] = RateEntry{Count: rateLimiter.RateMap[ip].Count + 1, LastAction: time.Now(), Ban: true}
-				} else {
-					rateLimiter.RateMap[ip] = RateEntry{Count: rateLimiter.RateMap[ip].Count + 1, LastAction: rateLimiter.RateMap[ip].LastAction, Ban: false}
-				}
-			}
-		}
-	} else {
-		rateLimiter.RateMap[ip] = RateEntry{Count: 0, LastAction: time.Now(), Ban: false}
-	}
-	return
-}
-
-// ExecuteStatements exportable
-func ExecuteStatements(db *sql.DB, stmts []string) (err error) {
-	for _, stmt := range stmts {
-		ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancelfunc()
-		_, err = db.ExecContext(ctx, stmt)
-		if err != nil {
-			fmt.Println("ResStatus:", err)
-			return
-		}
-	}
-	return
 }
 
 var netClient = &http.Client{
