@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
-	"strings"
 	"time"
 
 	model "github.com/GuillaumeBergeronGeoffroy/chacra-api/model"
@@ -27,19 +26,45 @@ func ExecuteStatements(db *sql.DB, stmts []string) (err error) {
 
 // SaveModel
 func SaveModel(model model.Model, db *sql.DB) (err error) {
-	err = model.Validate()
+	ctx := context.TODO()
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return
 	}
-	v := reflect.ValueOf(model)
-	typeOfS := v.Type()
-	modelTypes, modelValues, updateStmt := "", "", ""
-	for i := 0; i < v.NumField(); i++ {
-		modelTypes = fmt.Sprintln(modelTypes + typeOfS.Field(i).Name + ",")
-		modelValues = fmt.Sprintln(modelValues + fmt.Sprintln(v.Field(i).Interface()) + "','")
-		updateStmt = fmt.Sprintln(updateStmt + typeOfS.Field(i).Name + "= '" + fmt.Sprintln(v.Field(i).Interface()) + "', ")
+	defer tx.Rollback()
+	if err = model.Validate(); err != nil {
+		return
 	}
-	stmt := fmt.Sprintln("INSERT INTO " + fmt.Sprintln(reflect.TypeOf(model)) + " (" + strings.TrimSuffix(modelTypes, ",") + ") VALUES ('" + strings.TrimSuffix(modelValues, ",'") + ") ON DUPLICATE KEY UPDATE " + strings.TrimSuffix(updateStmt, ","))
-	err = ExecuteStatements(db, []string{stmt})
+	if err = model.BeforeSave(); err != nil {
+		return
+	}
+	v := reflect.ValueOf(model)
+	typeOfS := reflect.Indirect(v).Type()
+	modelValues, modelValuesStmt, modelTypes, updateStmt := []string{}, "", "", ""
+	for i := 0; i < reflect.Indirect(v).NumField(); i++ {
+		modelValues = append(modelValues, fmt.Sprintln(reflect.Indirect(v).Field(i).Interface()))
+		modelValuesStmt = fmt.Sprintln(modelValuesStmt + "?")
+		modelTypes = fmt.Sprintln(modelTypes + typeOfS.Field(i).Name)
+		updateStmt = fmt.Sprintln(updateStmt + typeOfS.Field(i).Name + " = ?")
+		if i+1 < reflect.Indirect(v).NumField() {
+			modelValuesStmt += " ,"
+			modelTypes += ","
+			updateStmt += ", "
+		}
+	}
+	stmt := fmt.Sprintln("INSERT INTO " + fmt.Sprintln(reflect.TypeOf(model).Elem().Name()) + " (" + modelTypes + ") VALUES (" + modelValuesStmt + ") ON DUPLICATE KEY UPDATE " + updateStmt)
+	modelValues = append(modelValues, modelValues...)
+	modelValuesInterface := make([]interface{}, len(modelValues))
+	for i, v := range modelValues {
+		modelValuesInterface[i] = v
+	}
+	if _, err = tx.ExecContext(ctx, stmt, modelValuesInterface...); err != nil {
+		fmt.Println(err)
+		return
+	}
+	if err = model.AfterSave(); err != nil {
+		return
+	}
+	err = tx.Commit()
 	return
 }

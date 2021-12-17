@@ -1,8 +1,12 @@
 package service
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
+	"time"
+
+	model "github.com/GuillaumeBergeronGeoffroy/chacra-api/model"
 )
 
 type producerPortal struct {
@@ -25,14 +29,21 @@ func ProducerPortal(dao *Dao) *producerPortal {
 func (m producerPortal) Actions() (ac Actions, err error) {
 	ac = map[string]Action{
 		"createProducer": func(w http.ResponseWriter, r *http.Request) {
-			// reqBody := u.Read(w, r)
-			// resBody, err := subscribe(reqBody, m)
-			// if err != nil {
-			// http.Error(w, err.Error(), http.StatusInternalServerError)
-			// return
-			// }
-			// u.Write(w, r, resBody)
-			w.WriteHeader(500)
+			producer := &model.Producer{}
+			reqBody := Read(w, r)
+			if err = json.Unmarshal([]byte(reqBody), producer); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			producer.ProducerCreatedAt = time.Now().Format("2006-01-02 15:04:05")
+			if err = SaveModel(producer, m.Dao.DB); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Write(ComposeResponse(w, map[string]string{
+				"message": "Votre place est réservé!",
+				"success": "true",
+			}))
 		},
 	}
 	return
@@ -46,6 +57,7 @@ var ppInitSql = []string{
 		ProducerId INT NOT NULL AUTO_INCREMENT,
 		ProducerEmail VARCHAR(255) NOT NULL,
 		ProducerPassword VARCHAR(255),
+		ProducerName VARCHAR(255), 
 		ProducerCreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 		ProducerStatus TINYINT DEFAULT 0,
 		PRIMARY KEY (ProducerId),

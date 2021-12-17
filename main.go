@@ -21,8 +21,7 @@ func loadConfig() (config Config, err error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 	viper.AutomaticEnv()
-	err = viper.ReadInConfig()
-	if err != nil {
+	if err = viper.ReadInConfig(); err != nil {
 		return
 	}
 	err = viper.Unmarshal(&config)

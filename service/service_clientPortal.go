@@ -2,9 +2,9 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	model "github.com/GuillaumeBergeronGeoffroy/chacra-api/model"
 )
@@ -31,16 +31,19 @@ func (m clientPortal) Actions() (ac Actions, err error) {
 		"createUser": func(w http.ResponseWriter, r *http.Request) {
 			user := &model.User{}
 			reqBody := Read(w, r)
-			err = json.Unmarshal([]byte(reqBody), user)
-			if err != nil {
+			if err = json.Unmarshal([]byte(reqBody), user); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			fmt.Println(user)
-			err = SaveModel(user, m.Dao.DB)
-			if err != nil {
+			user.UserCreatedAt = time.Now().Format("2006-01-02 15:04:05")
+			if err = SaveModel(user, m.Dao.DB); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
+			w.Write(ComposeResponse(w, map[string]string{
+				"message": "Votre place est réservé!",
+				"success": "true",
+			}))
 		},
 	}
 	return
@@ -50,8 +53,9 @@ var cpInitSql = []string{
 	`CREATE TABLE User (
 		UserId INT NOT NULL AUTO_INCREMENT,
 		UserEmail VARCHAR(255) NOT NULL,
-		UserPassword VARCHAR(255), 
-		UserCreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		UserPassword VARCHAR(55), 
+		UserName VARCHAR(255), 
+		UserCreatedAt DATETIME default current_timestamp,
 		UserStatus TINYINT DEFAULT 0,
 		PRIMARY KEY (UserId),
 		CONSTRAINT uidx_User_UserEmail UNIQUE (UserEmail)

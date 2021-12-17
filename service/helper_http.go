@@ -40,9 +40,7 @@ func Request(netClient *http.Client, route string, reqBody []byte) (resStatusCod
 
 // WriteJSON exportable
 func WriteJSON(w http.ResponseWriter, r *http.Request, resBody []byte) {
-	if resBody != nil {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resBody)
-	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resBody)
 }
 

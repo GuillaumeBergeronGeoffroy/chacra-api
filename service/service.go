@@ -75,27 +75,25 @@ func InitService(sc ServiceConfig, gateway map[string]string) (ac Actions, err e
 	daoIns.HttpClient = netClient
 	// Mysql connection pool init
 	if sc.Mysqldb {
-		daoIns.DB, err = sql.Open("mysql", sc.User+":"+sc.Password+"@tcp("+sc.Host+":"+sc.Port+")/chacra")
-		if err != nil {
+		if daoIns.DB, err = sql.Open("mysql", sc.User+":"+sc.Password+"@tcp("+sc.Host+":"+sc.Port+")/chacra"); err != nil {
 			return
 		}
-		err = daoIns.DB.Ping()
-		if err != nil {
+		if err = daoIns.DB.Ping(); err != nil {
 			return
 		}
 	}
 	// Redis connection pool init
-	if sc.RedisStore {
-		daoIns.Ctx = context.TODO()
-		daoIns.RedisClient = redis.NewClient(&redis.Options{
-			Addr:     sc.Host + ":" + sc.Port,
-			Password: sc.Password,
-			DB:       0,
-		})
-		if err = daoIns.RedisClient.Ping(daoIns.Ctx).Err(); err != nil {
-			return
-		}
-	}
+	// if sc.RedisStore {
+	// 	daoIns.Ctx = context.TODO()
+	// 	daoIns.RedisClient = redis.NewClient(&redis.Options{
+	// 		Addr:     sc.Host + ":" + sc.Port,
+	// 		Password: sc.Password,
+	// 		DB:       0,
+	// 	})
+	// 	if err = daoIns.RedisClient.Ping(daoIns.Ctx).Err(); err != nil {
+	// 		return
+	// 	}
+	// }
 	switch sc.Name {
 	case "ClientPortal":
 		ac, err = ClientPortal(&daoIns).Actions()

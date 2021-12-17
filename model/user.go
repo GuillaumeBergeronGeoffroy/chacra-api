@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 const status_waitlist = 0
 const status_active = 1
 
@@ -10,8 +8,19 @@ type User struct {
 	UserId        uint32
 	UserEmail     string
 	UserPassword  string
-	UserCreatedAt time.Time
+	UserName      string
+	UserCreatedAt string
 	UserStatus    uint8
+}
+
+// UserAfterSave exportable
+func (m User) AfterSave() (err error) {
+	return
+}
+
+// UserBeforeSave exportable
+func (m User) BeforeSave() (err error) {
+	return
 }
 
 // UserValidate exportable

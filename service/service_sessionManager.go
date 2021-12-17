@@ -55,15 +55,12 @@ func (m sessionManager) Actions() (ac Actions, err error) {
 			// 	}))
 			// }
 			reqBody := Read(w, r)
-			_, err := subscribe(reqBody, m)
+			_, resBody, err := subscribe(reqBody, m)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			WriteJSON(w, r, ComposeResponse(w, map[string]string{
-				"message": "Bienvenue.",
-				"success": "true",
-			}))
+			WriteJSON(w, r, resBody)
 		},
 	}
 	return
@@ -74,13 +71,14 @@ type subscribeRequest struct {
 	ProducerEmail    string `json:"producerEmail,omitempty"`
 	UserPassword     string `json:"userPassword,omitempty"`
 	ProducerPassword string `json:"producerPassword,omitempty"`
+	UserName         string `json:"userName,omitempty"`
+	ProducerName     string `json:"producerName,omitempty"`
 	Status           string
 }
 
-func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
+func subscribe(reqBody []byte, m sessionManager) (resStatus int, resBody []byte, err error) {
 	s := &subscribeRequest{}
-	err = json.Unmarshal([]byte(reqBody), s)
-	if err != nil {
+	if err = json.Unmarshal([]byte(reqBody), s); err != nil {
 		return
 	}
 	var gateway string
@@ -95,9 +93,6 @@ func subscribe(reqBody []byte, m sessionManager) (resBody []byte, err error) {
 		err = errors.New("invalid submission format")
 		return
 	}
-	resStatus, resBody, err := Request(m.Dao.HttpClient, m.Dao.Gateway[gateway]+endRoute, reqBody)
-	if resStatus < 200 || resStatus > 299 {
-		err = errors.New("something went wrong")
-	}
+	resStatus, resBody, err = Request(m.Dao.HttpClient, m.Dao.Gateway[gateway]+endRoute, reqBody)
 	return
 }

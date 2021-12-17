@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 // SystemTransaction model exportable
 type SystemTransaction struct {
 	SystemTransactionId        uint32
@@ -9,7 +7,7 @@ type SystemTransaction struct {
 	UserId                     uint32
 	ProducerId                 uint32
 	EmployeeId                 uint32
-	SystemTransactionCreatedAt time.Time
+	SystemTransactionCreatedAt string
 }
 
 // SystemTransactionValidate exportable

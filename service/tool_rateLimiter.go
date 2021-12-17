@@ -36,7 +36,7 @@ func EvalRateLimit(r *http.Request, rateLimiter *RateLimiter) (err error) {
 	rateLimiter.mu.Lock()
 	defer rateLimiter.mu.Unlock()
 	if rateEntry, ok := rateLimiter.RateMap[ip]; ok {
-		if rateEntry.Ban == true {
+		if rateEntry.Ban {
 			if time.Now().Sub(rateEntry.LastAction).Seconds() > rateLimiter.BanDelay {
 				rateLimiter.RateMap[ip] = RateEntry{Count: 1, LastAction: time.Now(), Ban: false}
 				err = errors.New("gotta go fast")
